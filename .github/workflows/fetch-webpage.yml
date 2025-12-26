@@ -1,59 +1,44 @@
-name: Download Homepage
+name: Download Homepage Every 5 Minutes
 
-# Run every minute
 on:
   schedule:
-    - cron: '* * * * *'  # Every minute (GitHub may throttle this to ~5 min)
-  
-  # Allow manual triggering
+    - cron: '0 * * * *'  # Every hour
   workflow_dispatch:
 
 jobs:
-  download-page:
+  download:
     runs-on: ubuntu-latest
-    
     steps:
-      # Step 1: Checkout repository
-      - name: 📥 Checkout code
+      - name: 📥 Checkout
         uses: actions/checkout@v4
       
-      # Step 2: Download the webpage
-      - name: 🌐 Download homepage
+      - name: 🌐 Download page
         run: |
-          echo "Downloading https://the-real-kevin.github.io ..."
-          
-          # Create downloads directory
           mkdir -p downloads
-          
-          # Get current timestamp
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-          
-          # Download the page
-          curl -L https://the-real-kevin.github.io \
-            -o downloads/homepage_${TIMESTAMP}.html \
-            --silent \
-            --show-error
-          
-          # Also save as latest
+          curl -L https://the-real-kevin.github.io -o downloads/homepage_${TIMESTAMP}.html
           cp downloads/homepage_${TIMESTAMP}.html downloads/homepage_latest.html
-          
-          echo "✅ Downloaded to downloads/homepage_${TIMESTAMP}.html"
-      
-      # Step 3: Show file info
-      - name: 📊 Show download info
-        run: |
-          echo "File size:"
+          echo "Downloaded at ${TIMESTAMP}"
           ls -lh downloads/homepage_latest.html
-          
-          echo ""
-          echo "First 10 lines:"
-          head -n 10 downloads/homepage_latest.html
       
-      # Step 4: Upload as artifact
-      - name: 📤 Upload artifacts
+      - name: 📤 Upload
         uses: actions/upload-artifact@v4
         with:
           name: homepage-${{ github.run_number }}
           path: downloads/*.html
-          retention-days: 7
+          retention-days: 3
 
+      - name: 🔄 Check for changes
+        run: |
+          if [ -f downloads/homepage_previous.html ]; then
+            if diff downloads/homepage_latest.html downloads/homepage_previous.html > /dev/null; then
+              echo "✅ No changes detected"
+            else
+              echo "🆕 Page has changed!"
+            fi
+          else
+            echo "📝 First run - no previous version to compare"
+          fi
+          
+          # Save current as previous for next run
+          cp downloads/homepage_latest.html downloads/homepage_previous.html
