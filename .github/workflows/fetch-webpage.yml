@@ -56,18 +56,4 @@ jobs:
           name: homepage-${{ github.run_number }}
           path: downloads/*.html
           retention-days: 7
-```
 
-### Step 3: Create .gitkeep (optional)
-
-Create `downloads/.gitkeep`:
-```
-# This file ensures the downloads directory is tracked by git
-```
-
-### Step 4: Create .gitignore
-
-Create/update `.gitignore`:
-```
-downloads/*.html
-!downloads/.gitkeep
