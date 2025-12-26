@@ -1,0 +1,73 @@
+name: Download Homepage
+
+# Run every minute
+on:
+  schedule:
+    - cron: '* * * * *'  # Every minute (GitHub may throttle this to ~5 min)
+  
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  download-page:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # Step 1: Checkout repository
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+      
+      # Step 2: Download the webpage
+      - name: 🌐 Download homepage
+        run: |
+          echo "Downloading https://the-real-kevin.github.io ..."
+          
+          # Create downloads directory
+          mkdir -p downloads
+          
+          # Get current timestamp
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+          
+          # Download the page
+          curl -L https://the-real-kevin.github.io \
+            -o downloads/homepage_${TIMESTAMP}.html \
+            --silent \
+            --show-error
+          
+          # Also save as latest
+          cp downloads/homepage_${TIMESTAMP}.html downloads/homepage_latest.html
+          
+          echo "✅ Downloaded to downloads/homepage_${TIMESTAMP}.html"
+      
+      # Step 3: Show file info
+      - name: 📊 Show download info
+        run: |
+          echo "File size:"
+          ls -lh downloads/homepage_latest.html
+          
+          echo ""
+          echo "First 10 lines:"
+          head -n 10 downloads/homepage_latest.html
+      
+      # Step 4: Upload as artifact
+      - name: 📤 Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: homepage-${{ github.run_number }}
+          path: downloads/*.html
+          retention-days: 7
+```
+
+### Step 3: Create .gitkeep (optional)
+
+Create `downloads/.gitkeep`:
+```
+# This file ensures the downloads directory is tracked by git
+```
+
+### Step 4: Create .gitignore
+
+Create/update `.gitignore`:
+```
+downloads/*.html
+!downloads/.gitkeep
