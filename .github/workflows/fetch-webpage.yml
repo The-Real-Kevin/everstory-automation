@@ -2,7 +2,7 @@ name: Download Homepage Every 5 Minutes
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Every hour
+    - cron: '0 */2 * * *'  # Every day at 2 
   workflow_dispatch:
 
 jobs:
@@ -42,3 +42,94 @@ jobs:
           
           # Save current as previous for next run
           cp downloads/homepage_latest.html downloads/homepage_previous.html
+
+name: Fetch and Compare Google Sheets
+
+on:
+  schedule:
+    - cron: '0 */2 * * *'  # Every day at 2 
+  workflow_dispatch:
+
+jobs:
+  fetch-and-compare:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: 🐍 Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      # Simulate downloading current sheet
+      - name: 📊 Download current sheet
+        run: |
+          mkdir -p data
+          
+          # SIMULATE: In real version, this would fetch from Google Sheets
+          # For now, create a dummy CSV with some data
+          cat > data/moderated_responses_latest.csv << 'EOF'
+          Verification,Moderator,Timestamp,Item_Name,Description
+          verified,John Doe,2024-01-01,Apple,A red fruit
+          verified,Jane Smith,2024-01-02,Banana,A yellow fruit
+          verified,Bob Johnson,2024-01-03,Cherry,A small red fruit
+          verified,Alice Williams,2024-01-04,Date,A sweet brown fruit
+          EOF
+          
+          echo "✅ Downloaded current sheet"
+          echo "Current sheet contents:"
+          cat data/moderated_responses_latest.csv
+      
+      # Download previous version from artifacts or create dummy
+      - name: 📥 Get previous version
+        continue-on-error: true
+        run: |
+          # Check if previous version exists
+          if [ -f data/moderated_responses_previous.csv ]; then
+            echo "✅ Previous version found"
+          else
+            echo "⚠️  No previous version - creating dummy"
+            # Create a previous version with fewer rows
+            cat > data/moderated_responses_previous.csv << 'EOF'
+          Verification,Moderator,Timestamp,Item_Name,Description
+          verified,John Doe,2024-01-01,Apple,A red fruit
+          verified,Jane Smith,2024-01-02,Banana,A yellow fruit
+          EOF
+          fi
+          
+          echo "Previous sheet contents:"
+          cat data/moderated_responses_previous.csv
+      
+      # Compare sheets
+      - name: 🔍 Compare sheets
+        run: |
+          python compare_sheets.py
+      
+      # Show results
+      - name: 📋 Show new rows
+        run: |
+          if [ -f data/new_rows.csv ]; then
+            echo "New rows found:"
+            cat data/new_rows.csv
+          else
+            echo "No new rows file generated"
+          fi
+      
+      # Save current as previous for next run
+      - name: 💾 Update previous version
+        run: |
+          cp data/moderated_responses_latest.csv data/moderated_responses_previous.csv
+          echo "✅ Updated previous version for next comparison"
+      
+      # Upload results
+      - name: 📤 Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: comparison-results-${{ github.run_number }}
+          path: |
+            data/moderated_responses_latest.csv
+            data/moderated_responses_previous.csv
+            data/new_rows.csv
+          retention-days: 7
