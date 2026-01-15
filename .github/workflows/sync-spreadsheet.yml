@@ -1,0 +1,102 @@
+name: Sync Moderated Responses Sheet
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync-sheet:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Create data directory
+        run: mkdir -p data
+      
+      - name: Check if original.csv exists
+        id: check_original
+        run: |
+          if [ -f data/original.csv ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Original file exists - will compare and update"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "No original file - first download"
+          fi
+      
+      - name: Download sheet (first time)
+        if: steps.check_original.outputs.exists == 'false'
+        run: |
+          FILE_ID="1qXx3RovjLSWA_vcLw4LBo7xXLZcotHnjSIibuxohN1A"
+          SHEET_GID="1697181685"
+          
+          curl -L "https://docs.google.com/spreadsheets/d/${FILE_ID}/export?format=csv&gid=${SHEET_GID}" \
+            -o data/original.csv
+          
+          echo "Downloaded original.csv"
+          wc -l data/original.csv
+      
+      - name: Download sheet as update.csv
+        if: steps.check_original.outputs.exists == 'true'
+        run: |
+          FILE_ID="1qXx3RovjLSWA_vcLw4LBo7xXLZcotHnjSIibuxohN1A"
+          SHEET_GID="1697181685"
+          
+          curl -L "https://docs.google.com/spreadsheets/d/${FILE_ID}/export?format=csv&gid=${SHEET_GID}" \
+            -o data/update.csv
+          
+          echo "Downloaded update.csv"
+          wc -l data/update.csv
+      
+      - name: Compare and extract additions
+        if: steps.check_original.outputs.exists == 'true'
+        run: |
+          head -n 1 data/update.csv > data/additions.csv
+          
+          tail -n +2 data/update.csv | sort > /tmp/update_sorted.txt
+          tail -n +2 data/original.csv | sort > /tmp/original_sorted.txt
+          
+          comm -23 /tmp/update_sorted.txt /tmp/original_sorted.txt >> data/additions.csv
+          
+          NEW_COUNT=$(( $(wc -l < data/additions.csv) - 1 ))
+          echo "Found $NEW_COUNT new rows"
+          
+          if [ $NEW_COUNT -gt 0 ]; then
+            echo "Preview of additions:"
+            head -n 3 data/additions.csv
+          fi
+      
+      - name: Replace original with update
+        if: steps.check_original.outputs.exists == 'true'
+        run: |
+          rm data/original.csv
+          mv data/update.csv data/original.csv
+          echo "Replaced original.csv with update.csv"
+      
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          git add data/
+          
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+            git commit -m "Update spreadsheet data - ${TIMESTAMP}"
+            git push
+            echo "Changes committed and pushed"
+          fi
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: spreadsheet-data-${{ github.run_number }}
+          path: data/*.csv
+          retention-days: 30
