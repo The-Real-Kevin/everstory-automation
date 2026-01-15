@@ -1,5 +1,8 @@
 name: Sync Moderated Responses Sheet
 
+permissions:
+     contents: write
+     
 on:
   schedule:
     - cron: '0 */12 * * *'
@@ -14,6 +17,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          persist-credentials: true
       
       - name: Create data directory
         run: mkdir -p data
