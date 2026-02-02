@@ -1,7 +1,7 @@
 name: Sync Moderated Responses Sheet
 
 permissions:
-     contents: write
+  contents: write
      
 on:
   schedule:
@@ -69,11 +69,85 @@ jobs:
           
           NEW_COUNT=$(( $(wc -l < data/additions.csv) - 1 ))
           echo "Found $NEW_COUNT new rows"
+          echo "new_count=$NEW_COUNT" >> $GITHUB_OUTPUT
           
           if [ $NEW_COUNT -gt 0 ]; then
             echo "Preview of additions:"
             head -n 3 data/additions.csv
           fi
+        id: compare
+      
+      - name: Set up Python
+        if: steps.check_original.outputs.exists == 'true' && steps.compare.outputs.new_count > 0
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Parse additions to JSON
+        if: steps.check_original.outputs.exists == 'true' && steps.compare.outputs.new_count > 0
+        run: |
+          python3 << 'EOF'
+          import csv
+          import json
+          from typing import Optional
+
+          def parse_value(value: str) -> Optional[str]:
+              """Return None for empty strings, otherwise return trimmed value"""
+              if not value or value.strip() == '':
+                  return None
+              return value.strip()
+
+          def parse_int(value: str) -> Optional[int]:
+              """Parse integer or return None"""
+              if not value or value.strip() == '':
+                  return None
+              try:
+                  return int(value.strip())
+              except ValueError:
+                  return None
+
+          # Read additions.csv
+          entries = []
+          with open('data/additions.csv', 'r', encoding='utf-8') as f:
+              reader = csv.DictReader(f)
+              
+              for row in reader:
+                  entry = {
+                      'verification': parse_value(row.get('Verification')),
+                      'moderator': parse_value(row.get('Moderator')),
+                      'moderation_timestamp': parse_value(row.get('Moderation Timestamp')),
+                      'timestamp': parse_value(row.get('Timestamp')),
+                      'first_name': parse_value(row.get('Your_First_Name')),
+                      'last_name': parse_value(row.get('Your_Last_Name')),
+                      'email': parse_value(row.get('Your_email_address')),
+                      'item_name': parse_value(row.get('Item_Name')),
+                      'item_name_audio_link': parse_value(row.get('Item_Name_Audio_File_Link')),
+                      'item_description_text': parse_value(row.get('Item_Description_Text')),
+                      'item_description_audio_link': parse_value(row.get('Item_Description_Audio_File_Link')),
+                      'date_of_origin_calendar': parse_value(row.get('Date_Of_Origin_Calendar')),
+                      'date_of_origin_years_ago': parse_int(row.get('Date_Of_Origin_Years_Ago')),
+                      'location_name': parse_value(row.get('Location_Of_Origin_Place_Name')),
+                      'location_gps': parse_value(row.get('Location_Of_Origin_GPS')),
+                      'item_image_link': parse_value(row.get('Item_Image_File_Link')),
+                      'image_source_link': parse_value(row.get('Image_Source_Link')),
+                      'image_credit': parse_value(row.get('Image Credit')),
+                      'next_12': parse_value(row.get('Next_12')),
+                      'tags': parse_value(row.get('Tags')),
+                      'sources': parse_value(row.get('Sources'))
+                  }
+                  entries.append(entry)
+
+          # Save to JSON
+          with open('data/additions.json', 'w', encoding='utf-8') as f:
+              json.dump(entries, f, indent=2, ensure_ascii=False)
+
+          print(f"Parsed {len(entries)} entries to JSON")
+          
+          # Print preview
+          if entries:
+              print("\nFirst entry preview:")
+              print(json.dumps(entries[0], indent=2))
+          EOF
       
       - name: Replace original with update
         if: steps.check_original.outputs.exists == 'true'
@@ -102,5 +176,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: spreadsheet-data-${{ github.run_number }}
-          path: data/*.csv
+          path: |
+            data/*.csv
+            data/*.json
           retention-days: 30
