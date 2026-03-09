@@ -1,5 +1,4 @@
 name: Sync Moderated Responses Sheet
-
 permissions:
   contents: write
      
@@ -7,7 +6,6 @@ on:
   schedule:
     - cron: '0 */12 * * *'
   workflow_dispatch:
-
 jobs:
   sync-sheet:
     runs-on: ubuntu-latest
@@ -20,7 +18,7 @@ jobs:
           persist-credentials: true
       
       - name: Create data directory
-        run: mkdir -p data
+        run: mkdir -p data images
       
       - name: Check if original.csv exists
         id: check_original
@@ -90,13 +88,11 @@ jobs:
           import csv
           import json
           from typing import Optional
-
           def parse_value(value: str) -> Optional[str]:
               """Return None for empty strings, otherwise return trimmed value"""
               if not value or value.strip() == '':
                   return None
               return value.strip()
-
           def parse_int(value: str) -> Optional[int]:
               """Parse integer or return None"""
               if not value or value.strip() == '':
@@ -105,7 +101,6 @@ jobs:
                   return int(value.strip())
               except ValueError:
                   return None
-
           # Read additions.csv
           entries = []
           with open('data/additions.csv', 'r', encoding='utf-8') as f:
@@ -136,17 +131,168 @@ jobs:
                       'sources': parse_value(row.get('Sources'))
                   }
                   entries.append(entry)
-
           # Save to JSON
           with open('data/additions.json', 'w', encoding='utf-8') as f:
               json.dump(entries, f, indent=2, ensure_ascii=False)
-
           print(f"Parsed {len(entries)} entries to JSON")
           
           # Print preview
           if entries:
               print("\nFirst entry preview:")
               print(json.dumps(entries[0], indent=2))
+          EOF
+      
+      - name: Clear old images
+        if: steps.check_original.outputs.exists == 'true' && steps.compare.outputs.new_count > 0
+        run: |
+          echo "Clearing old images from images/ directory"
+          rm -rf images/*
+          echo "Old images cleared"
+      
+      - name: Download images for new entries
+        if: steps.check_original.outputs.exists == 'true' && steps.compare.outputs.new_count > 0
+        run: |
+          python3 << 'EOF'
+          import json
+          import os
+          import re
+          import subprocess
+          import hashlib
+          from urllib.parse import urlparse
+          def extract_google_drive_id(url):
+              """Extract file ID from Google Drive URL"""
+              patterns = [
+                  r'/d/([a-zA-Z0-9_-]+)',
+                  r'id=([a-zA-Z0-9_-]+)',
+                  r'/file/d/([a-zA-Z0-9_-]+)'
+              ]
+              for pattern in patterns:
+                  match = re.search(pattern, url)
+                  if match:
+                      return match.group(1)
+              return None
+          def get_file_extension(url):
+              """Try to determine file extension from URL"""
+              parsed = urlparse(url)
+              path = parsed.path
+              if '.' in path:
+                  ext = os.path.splitext(path)[1]
+                  if ext in ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp']:
+                      return ext
+              return '.jpg'
+          def sanitize_filename(name):
+              """Create safe filename from item name"""
+              name = re.sub(r'[^\w\s-]', '', name)
+              name = re.sub(r'[-\s]+', '_', name)
+              return name[:50].lower()
+          def download_google_drive_file(file_id, output_path):
+              """Download file from Google Drive"""
+              url = f"https://drive.google.com/uc?export=download&id={file_id}"
+              try:
+                  result = subprocess.run(
+                      ['curl', '-L', url, '-o', output_path],
+                      capture_output=True,
+                      timeout=30
+                  )
+                  return result.returncode == 0
+              except Exception as e:
+                  print(f"Error downloading Google Drive file: {e}")
+                  return False
+          def download_direct_url(url, output_path):
+              """Download file from direct URL"""
+              try:
+                  result = subprocess.run(
+                      ['curl', '-L', url, '-o', output_path, '--max-filesize', '10485760'],
+                      capture_output=True,
+                      timeout=30
+                  )
+                  return result.returncode == 0
+              except Exception as e:
+                  print(f"Error downloading from URL: {e}")
+                  return False
+          # Load additions
+          with open('data/additions.json', 'r') as f:
+              entries = json.load(f)
+          os.makedirs('images', exist_ok=True)
+          downloaded_count = 0
+          failed_count = 0
+          download_log = []
+          for idx, entry in enumerate(entries):
+              item_name = entry.get('item_name')
+              image_link = entry.get('item_image_link')
+              
+              if not image_link:
+                  print(f"[{idx+1}] Skipping {item_name} - no image link")
+                  continue
+              
+              safe_name = sanitize_filename(item_name) if item_name else f"item_{idx}"
+              
+              is_google_drive = 'drive.google.com' in image_link
+              
+              if is_google_drive:
+                  file_id = extract_google_drive_id(image_link)
+                  if not file_id:
+                      print(f"[{idx+1}] Failed to extract Google Drive ID from: {image_link}")
+                      failed_count += 1
+                      download_log.append({
+                          'item_name': item_name,
+                          'url': image_link,
+                          'status': 'failed',
+                          'reason': 'invalid_drive_url'
+                      })
+                      continue
+                  
+                  ext = get_file_extension(image_link)
+                  output_path = f"images/{safe_name}{ext}"
+                  
+                  print(f"[{idx+1}] Downloading from Google Drive: {item_name}")
+                  success = download_google_drive_file(file_id, output_path)
+              else:
+                  ext = get_file_extension(image_link)
+                  output_path = f"images/{safe_name}{ext}"
+                  
+                  print(f"[{idx+1}] Downloading from URL: {item_name}")
+                  success = download_direct_url(image_link, output_path)
+              
+              if success and os.path.exists(output_path):
+                  file_size = os.path.getsize(output_path)
+                  if file_size > 0:
+                      print(f"     Success - {file_size} bytes saved to {output_path}")
+                      downloaded_count += 1
+                      download_log.append({
+                          'item_name': item_name,
+                          'url': image_link,
+                          'local_path': output_path,
+                          'file_size': file_size,
+                          'status': 'success'
+                      })
+                  else:
+                      print(f"     Failed - empty file")
+                      os.remove(output_path)
+                      failed_count += 1
+                      download_log.append({
+                          'item_name': item_name,
+                          'url': image_link,
+                          'status': 'failed',
+                          'reason': 'empty_file'
+                      })
+              else:
+                  print(f"     Failed to download")
+                  failed_count += 1
+                  download_log.append({
+                      'item_name': item_name,
+                      'url': image_link,
+                      'status': 'failed',
+                      'reason': 'download_error'
+                  })
+          # Save download log
+          with open('data/download_log.json', 'w') as f:
+              json.dump(download_log, f, indent=2)
+          print(f"\nDownload Summary:")
+          print(f"  Total entries: {len(entries)}")
+          print(f"  Successfully downloaded: {downloaded_count}")
+          print(f"  Failed: {failed_count}")
+          print(f"  No image link: {len(entries) - downloaded_count - failed_count}")
           EOF
       
       - name: Replace original with update
@@ -161,7 +307,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           
-          git add data/
+          git add data/ images/
           
           if git diff --staged --quiet; then
             echo "No changes to commit"
@@ -179,4 +325,5 @@ jobs:
           path: |
             data/*.csv
             data/*.json
-          retention-days: 30
+            images/*
+          retention-days: 5
