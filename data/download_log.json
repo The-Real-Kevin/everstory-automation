@@ -1,23 +1,9 @@
 [
   {
-    "item_name": "kevin",
-    "url": "https://wallpapers.com/images/high/linux-penguin-mascot-d86acczvvyc4ss0j.png",
-    "local_path": "images/kevin.png",
-    "file_size": 74108,
-    "status": "success"
-  },
-  {
-    "item_name": "kevin",
-    "url": "https://wallpapers.com/images/high/linux-penguin-mascot-d86acczvvyc4ss0j.png",
-    "local_path": "images/kevin.png",
-    "file_size": 74108,
-    "status": "success"
-  },
-  {
-    "item_name": "kevin",
-    "url": "https://wallpapers.com/images/high/linux-penguin-mascot-d86acczvvyc4ss0j.png",
-    "local_path": "images/kevin.png",
-    "file_size": 74108,
+    "item_name": "Ballet Shoes",
+    "url": "https://drive.google.com/file/d/1PLj8QfDiE4H1qq2WD1uP2l7s8VnbrAae/view?usp=drive_link",
+    "local_path": "images/ballet_shoes.jpg",
+    "file_size": 797182,
     "status": "success"
   }
 ]
