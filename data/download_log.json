@@ -1,9 +1,74 @@
 [
   {
-    "item_name": "Ballet Shoes",
-    "url": "https://drive.google.com/file/d/1PLj8QfDiE4H1qq2WD1uP2l7s8VnbrAae/view?usp=drive_link",
-    "local_path": "images/ballet_shoes.jpg",
-    "file_size": 797182,
+    "item_name": "pikachu",
+    "url": "https://drive.google.com/file/d/1Ga5Wvkog2_1h2YFJ5phAQm5bHXjY6JhS/view?usp=drive_link",
+    "local_path": "images/pikachu.jpg",
+    "file_size": 58588,
+    "status": "success"
+  },
+  {
+    "item_name": "Astronaut",
+    "url": "https://drive.google.com/file/d/1RDMDmBiwMCk7LeLVKUfQrRG0tNkUrRuY/view?usp=drive_link",
+    "local_path": "images/astronaut.jpg",
+    "file_size": 141394,
+    "status": "success"
+  },
+  {
+    "item_name": "Pen",
+    "url": "49.4875\u00b0 N, 8.4660\u00b0 E",
+    "status": "failed",
+    "reason": "download_error"
+  },
+  {
+    "item_name": "Fountain pen",
+    "url": "can be very cold at the top",
+    "status": "failed",
+    "reason": "download_error"
+  },
+  {
+    "item_name": "Bindi",
+    "url": "https://drive.google.com/file/d/1fyG7l5FVuVtjPdtayi-LGXGq6yLRO3uz/view?usp=drive_link",
+    "local_path": "images/bindi.jpg",
+    "file_size": 2165369,
+    "status": "success"
+  },
+  {
+    "item_name": "Hot Chocolate",
+    "url": "https://drive.google.com/drive/folders/10hKkQjogLTmL3zbEi3zqvWQxKpDliTu7",
+    "status": "failed",
+    "reason": "invalid_drive_url"
+  },
+  {
+    "item_name": "Common Loon",
+    "url": "https://share.google/0m92slERAgTlHbRRh",
+    "local_path": "images/common_loon.jpg",
+    "file_size": 30138,
+    "status": "success"
+  },
+  {
+    "item_name": "groundhog",
+    "url": "Menlo Park, New Jersey, USA",
+    "status": "failed",
+    "reason": "download_error"
+  },
+  {
+    "item_name": "Oboe",
+    "url": "https://drive.google.com/file/d/1eJksyKlGROAFw-XlkDYVowlz37KKFGaT/view?usp=drive_link",
+    "local_path": "images/oboe.jpg",
+    "file_size": 20880,
+    "status": "success"
+  },
+  {
+    "item_name": "pie",
+    "url": "https://drive.google.com/drive/folders/1vHfcM4RzEhJ7u-39j2P29abHnVMrGBPb?usp=sharing",
+    "status": "failed",
+    "reason": "invalid_drive_url"
+  },
+  {
+    "item_name": "kevin",
+    "url": "https://wallpapers.com/images/high/linux-penguin-mascot-d86acczvvyc4ss0j.png",
+    "local_path": "images/kevin.png",
+    "file_size": 74108,
     "status": "success"
   }
 ]
