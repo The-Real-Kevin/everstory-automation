@@ -1,9 +1,8 @@
 [
   {
-    "item_name": "pizza",
-    "url": "https://drive.google.com/file/d/1HNgdSkTpVIgAV2UArWPbr5POev2af_B3/view?usp=drive_link",
-    "local_path": "images/pizza.jpg",
-    "file_size": 443611,
-    "status": "success"
+    "item_name": "~1000 years ago",
+    "url": "\"Prehistoric Inuit Snow-Goggles, circa 1200\". Canadian Museum of Civilization. 1997-10-03. Archived: https://web.archive.org/web/20110706173656/http://collections.civilisations.ca/public/pages/cmccpublic/alt-emupublic/Display.php?irn=855927. Wikipedia: https://en.wikipedia.org/wiki/Sunglasses#History",
+    "status": "failed",
+    "reason": "download_error"
   }
 ]
