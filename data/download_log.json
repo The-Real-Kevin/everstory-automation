@@ -1,14 +1,9 @@
 [
   {
-    "item_name": null,
-    "url": "1824 AD/CE",
-    "status": "failed",
-    "reason": "download_error"
-  },
-  {
-    "item_name": "~1000 years ago",
-    "url": "\"Prehistoric Inuit Snow-Goggles, circa 1200\". Canadian Museum of Civilization. 1997-10-03. Archived: https://web.archive.org/web/20110706173656/http://collections.civilisations.ca/public/pages/cmccpublic/alt-emupublic/Display.php?irn=855927. Wikipedia: https://en.wikipedia.org/wiki/Sunglasses#History\n[Fossil scientists think the first members of the Equida (which includes Horses, Zebras, and Donkeys) lived 55 million years ago\u2014after dinosaurs & before people.] The types of horses we know of today have been around for more than 4 million years and first lived in North America. Around 6,000 years ago people near Kazakhstan worked with horses--using them to carry heavy loads, help farmers, and travel. \nhttps://archive.org/details/originofeveryday0000acto/page/254/mode/2up\nhttps://www.historymuseum.ca/teachers-zone/history-box/early-canada/snow-goggles/",
-    "status": "failed",
-    "reason": "download_error"
+    "item_name": "pizza",
+    "url": "https://drive.google.com/file/d/1HNgdSkTpVIgAV2UArWPbr5POev2af_B3/view?usp=drive_link",
+    "local_path": "images/pizza.jpg",
+    "file_size": 443611,
+    "status": "success"
   }
 ]
