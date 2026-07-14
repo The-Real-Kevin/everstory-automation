@@ -1,8 +1,9 @@
 [
   {
-    "item_name": "~1000 years ago",
-    "url": "\"Prehistoric Inuit Snow-Goggles, circa 1200\". Canadian Museum of Civilization. 1997-10-03. Archived: https://web.archive.org/web/20110706173656/http://collections.civilisations.ca/public/pages/cmccpublic/alt-emupublic/Display.php?irn=855927. Wikipedia: https://en.wikipedia.org/wiki/Sunglasses#History",
-    "status": "failed",
-    "reason": "download_error"
+    "item_name": "Ice cream",
+    "url": "https://drive.google.com/file/d/1r1C1uTTTYIYJD0kThGsefMjWCCVI6lhx/view?usp=drive_link",
+    "local_path": "images/ice_cream.jpg",
+    "file_size": 13724,
+    "status": "success"
   }
 ]
