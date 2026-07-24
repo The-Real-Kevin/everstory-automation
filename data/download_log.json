@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "item_name": "North America",
+    "url": "also known as Woodchucks",
+    "status": "failed",
+    "reason": "download_error"
+  }
+]
