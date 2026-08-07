@@ -1,15 +1,1 @@
-[
-  {
-    "item_name": "Mountain",
-    "url": "https://drive.google.com/drive/folders/1CUJZAG9LRkhXmTDdn_AO5HDvEfT18Lb7",
-    "status": "failed",
-    "reason": "invalid_drive_url"
-  },
-  {
-    "item_name": "pizza",
-    "url": "https://drive.google.com/file/d/1HNgdSkTpVIgAV2UArWPbr5POev2af_B3/view?usp=drive_link",
-    "local_path": "images/pizza.jpg",
-    "file_size": 443611,
-    "status": "success"
-  }
-]
+[]
