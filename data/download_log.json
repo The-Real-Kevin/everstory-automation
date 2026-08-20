@@ -1,9 +1,8 @@
 [
   {
-    "item_name": "Turtle",
-    "url": "https://drive.google.com/file/d/1ILI_qrvpiJQb5mnKuYi5j0cDcv227-GB/view?usp=drive_link",
-    "local_path": "images/turtle.jpg",
-    "file_size": 804043,
-    "status": "success"
+    "item_name": "Mountain",
+    "url": "https://drive.google.com/drive/folders/1CUJZAG9LRkhXmTDdn_AO5HDvEfT18Lb7",
+    "status": "failed",
+    "reason": "invalid_drive_url"
   }
 ]
