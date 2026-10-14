@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "item_name": "Trumpet",
+    "url": "fruit teas",
+    "status": "failed",
+    "reason": "download_error"
+  }
+]
