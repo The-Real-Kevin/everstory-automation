@@ -1,9 +1,8 @@
 [
   {
-    "item_name": "Great White Shark",
-    "url": "https://drive.google.com/file/d/1zeRbKGNaPBBiQv_2TxBi1B-STJoSCOob/view?usp=drive_link",
-    "local_path": "images/great_white_shark.jpg",
-    "file_size": 118554,
-    "status": "success"
+    "item_name": "dough, crust, filling, fruits, pastry, nuts, honey, meat, vegetables, sweet potatoes, dessert, baking",
+    "url": "000 years ago in Sumer (which we now call Iraq)",
+    "status": "failed",
+    "reason": "download_error"
   }
 ]
